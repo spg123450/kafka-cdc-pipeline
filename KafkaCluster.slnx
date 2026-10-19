@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+  </Folder>
+  <Project Path="CDCTarget/CDCTarget.csproj" />
+  <Project Path="ChangeStreamManager/ChangeStreamManager.csproj" />
+  <Project Path="MessageBus/MessageBus.csproj" />
+  <Project Path="MigrationUtility/MigrationUtility.csproj" />
+  <Project Path="ResultSynchronization/ResultSynchronization.csproj" />
+  <Project Path="ServiceMessageBus/ServiceMessageBus.csproj" />
+  <Project Path="Topic.Services.Auth.Api/Topic.Services.Auth.Api.csproj" />
+  <Project Path="Topics/Topics.csproj" />
+  <Project Path="TopicSubscription/TopicSubscription.csproj" />
+</Solution>

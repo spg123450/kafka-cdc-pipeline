@@ -1,0 +1,6 @@
+@Topic.Services.Auth.Api_HostAddress = http://localhost:5253
+
+GET {{Topic.Services.Auth.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

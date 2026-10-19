@@ -1,0 +1,12 @@
+# .NET Core build folders
+bin/
+obj/
+.vs/
+
+# Local SQLite Databases
+*.db
+*.sqlite
+*.sqlite-journal
+
+# Local Secrets File
+appsettings.Development.json
