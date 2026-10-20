@@ -1,4 +1,6 @@
-﻿namespace Topics
+﻿using System.Text.Json;
+
+namespace Topics
 {
     public class CdcEvent
     {
@@ -9,7 +11,7 @@
         public CdcUpdateDescription UpdateDescription { get; set; }
 
         // This holds the actual database row payload as a raw JSON string
-        public string FullDocument { get; set; }
+        public JsonElement? FullDocument { get; set; }
     }
 
     public class CdcDocumentKey

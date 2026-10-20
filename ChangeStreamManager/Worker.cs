@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using Confluent.Kafka;
 using MessageBus;
 using System.Text.Json;
@@ -58,6 +59,17 @@ namespace ChangeStreamManager
                             {
                                 _logger.LogInformation("Parsed CDC Event: {OpType} on ID: {Id}",
                                     cdcEvent.OperationType, cdcEvent.DocumentKey?._id);
+                                // Create an HTTP Client to bridge the microservices
+                                using var httpClient = new HttpClient();
+
+                                // Replace 'cdcEvent' below with whatever your deserialized variable is actually named 
+                                // (e.g., if you named it parsedEvent, use parsedEvent instead of cdcEvent)
+                                var response = await httpClient.PostAsJsonAsync("http://localhost:5000/api/CDCTargetApi/receive", cdcEvent);
+
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    Console.WriteLine("Successfully forwarded event to CDCTarget API!");
+                                }
 
                                 // 2. Publish to the internal bus (Parallel execution via our Fire-and-Forget logic)
                                 await _messageBus.PublishAsync("cdc_events_topic", cdcEvent);

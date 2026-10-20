@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal Migration Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-300 font-mono p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-end border-b border-gray-700 pb-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-wider">MIGRATION DASHBOARD</h1>
+                <p class="text-gray-500 mt-1">Live Pipeline Monitor: MongoDB -> Kafka -> MessageBus</p>
+            </div>
+            <div class="text-right">
+                <div id="connectionStatus" class="inline-block px-3 py-1 rounded bg-red-900 text-red-300 text-sm font-bold mb-2">OFFLINE</div>
+                <div class="text-xl">Total Events: <span id="eventCount" class="text-cyan-400 font-bold">0</span></div>
+            </div>
+        </div>
+
+        <!-- Live Feed -->
+        <div class="bg-black p-4 rounded border border-gray-700 h-[600px] overflow-y-auto shadow-2xl" id="eventFeed">
+            <div class="text-gray-600 mb-2 italic">// Waiting for internal MessageBus payloads...</div>
+        </div>
+    </div>
+
+    <script>
+        let totalEvents = 0;
+
+        // 1. Connect to the internal C# Hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/dashboardHub")
+            .build();
+
+        // 2. Listen for the "ReceivePipelineEvent" broadcast
+        connection.on("ReceivePipelineEvent", function (payload) {
+            totalEvents++;
+            document.getElementById("eventCount").textContent = totalEvents;
+
+            const feed = document.getElementById("eventFeed");
+            const time = new Date().toISOString().split('T')[1].slice(0, -1);
+
+            const opType = payload.operationType || "UNKNOWN";
+            const docId = payload.documentKey ? payload.documentKey._id : "N/A";
+
+            // Color code the operation type
+            let opColor = "text-yellow-400";
+            if (opType.toLowerCase() === "insert") opColor = "text-green-400";
+            if (opType.toLowerCase() === "update") opColor = "text-blue-400";
+
+            // Create new log entry
+            const newElement = document.createElement("div");
+            newElement.className = "mb-1 border-b border-gray-800 pb-1 text-sm";
+            newElement.innerHTML = `
+                <span class="text-gray-500">[${time}]</span>
+                <span class="font-bold ${opColor} w-20 inline-block">${opType.toUpperCase()}</span>
+                <span class="text-gray-400">DOC_ID:</span> <span class="text-white">${docId}</span>
+            `;
+
+            // Prepend to top of feed
+            feed.prepend(newElement);
+        });
+
+        // 3. Start Connection
+        connection.start().then(function () {
+            const status = document.getElementById("connectionStatus");
+            status.textContent = "🟢 LIVE STREAM CONNECTED";
+            status.className = "inline-block px-3 py-1 rounded bg-green-900 text-green-300 text-sm font-bold mb-2 shadow-[0_0_10px_rgba(74,222,128,0.5)]";
+        }).catch(function (err) {
+            console.error(err.toString());
+        });
+    </script>
+</body>
+</html>

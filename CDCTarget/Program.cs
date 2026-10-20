@@ -23,8 +23,9 @@ builder.Services.AddSingleton<CDCTarget.Services.IServices.IEventBindingService,
 
 // 3. Add API Controller support
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); // For testing API endpoints via UI
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -32,16 +33,32 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        // This changes the dropdown menu text
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Downstream Consumer API v1");
+
+        // This changes the browser tab name
+        options.DocumentTitle = "Downstream Consumer UI";
+    });
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+    app.MapHub<CDCTarget.Hubs.DashboardHub>("/dashboardHub");
+
 }
 
 app.UseAuthorization();
 app.MapControllers();
 
 
-// Initialize the Event Binding Service on startup
+// Initialize the Database and Event Binding Service on startup
 using (var scope = app.Services.CreateScope())
 {
+    // 1. Force EF Core to create the database and tables if they are missing
+    var dbContext = scope.ServiceProvider.GetRequiredService<CDCTarget.Data.AppDbContext>();
+    dbContext.Database.Migrate();
+
+    // 2. Start listening to the Message Bus
     var bindingService = scope.ServiceProvider.GetRequiredService<CDCTarget.Services.IServices.IEventBindingService>();
     bindingService.InitializeBindings();
 }

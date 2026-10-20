@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "CDCTarget\\CDCTarget.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "ChangeStreamManager\\ChangeStreamManager.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
